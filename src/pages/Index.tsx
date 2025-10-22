@@ -3,10 +3,12 @@ import { GeneratorForm, GeneratorConfig } from "@/components/GeneratorForm";
 import { OutputCard } from "@/components/OutputCard";
 import { FileText, Image, Code2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GeneratedContent {
   text?: string;
   imagePrompt?: string;
+  imageUrl?: string;
   code?: string;
 }
 
@@ -19,17 +21,34 @@ const Index = () => {
     setGeneratedContent(null);
 
     try {
-      // For now, using mock data. Will integrate with Lovable AI next
-      const mockContent: GeneratedContent = {
-        text: generateMockText(config),
-        imagePrompt: generateMockImagePrompt(config),
-        code: generateMockCode(config),
-      };
+      const content: GeneratedContent = {};
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Generate based on selected mode
+      if (config.mode === "text") {
+        content.text = generateMockText(config);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } else if (config.mode === "image") {
+        const imagePrompt = generateMockImagePrompt(config);
+        content.imagePrompt = imagePrompt;
+        
+        // Call edge function to generate image
+        const { data, error } = await supabase.functions.invoke('generate-image', {
+          body: { prompt: imagePrompt }
+        });
+        
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        if (data?.imageUrl) {
+          content.imageUrl = data.imageUrl;
+        }
+      } else if (config.mode === "code") {
+        content.code = generateMockCode(config);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
 
-      setGeneratedContent(mockContent);
+      setGeneratedContent(content);
       toast.success("Content generated successfully!");
     } catch (error) {
       toast.error("Failed to generate content. Please try again.");
@@ -39,9 +58,6 @@ const Index = () => {
     }
   };
 
-  const shouldShowOutput = (mode: string, outputType: string) => {
-    return mode === "multi" || mode === outputType;
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -88,12 +104,32 @@ const Index = () => {
               )}
 
               {generatedContent.imagePrompt && (
-                <OutputCard
-                  title="Image Prompt"
-                  description="Ready for AI image generators"
-                  content={generatedContent.imagePrompt}
-                  icon={<Image className="h-5 w-5" />}
-                />
+                <>
+                  <OutputCard
+                    title="Image Prompt"
+                    description="Ready for AI image generators"
+                    content={generatedContent.imagePrompt}
+                    icon={<Image className="h-5 w-5" />}
+                  />
+                  {generatedContent.imageUrl && (
+                    <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border/50">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Image className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">Generated Image</h3>
+                          <p className="text-sm text-muted-foreground">AI-generated from your prompt</p>
+                        </div>
+                      </div>
+                      <img 
+                        src={generatedContent.imageUrl} 
+                        alt="AI generated" 
+                        className="w-full rounded-lg"
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
               {generatedContent.code && (

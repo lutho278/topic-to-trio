@@ -21,7 +21,7 @@ export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => 
   const [topic, setTopic] = useState("");
   const [tone, setTone] = useState("professional");
   const [length, setLength] = useState("medium");
-  const [mode, setMode] = useState("multi");
+  const [mode, setMode] = useState("text");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +81,6 @@ export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => 
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="multi">Multi (All)</SelectItem>
               <SelectItem value="text">Text Only</SelectItem>
               <SelectItem value="image">Image Prompt Only</SelectItem>
               <SelectItem value="code">Code Only</SelectItem>
