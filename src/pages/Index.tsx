@@ -25,8 +25,22 @@ const Index = () => {
 
       // Generate based on selected mode
       if (config.mode === "text") {
-        content.text = generateMockText(config);
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const { data, error } = await supabase.functions.invoke('generate-text', {
+          body: { 
+            prompt: config.prompt,
+            textType: config.textType,
+            tone: config.tone,
+            length: config.length
+          }
+        });
+        
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        if (data?.text) {
+          content.text = data.text;
+        }
       } else if (config.mode === "image") {
         const imagePrompt = generateMockImagePrompt(config);
         content.imagePrompt = imagePrompt;
@@ -156,17 +170,13 @@ const Index = () => {
   );
 };
 
-// Mock generation functions (will be replaced with AI)
-const generateMockText = (config: GeneratorConfig) => {
-  return `This is a ${config.tone} ${config.length} text about ${config.topic}. In this comprehensive exploration, we delve into the multifaceted aspects of ${config.topic}, examining its impact and significance in today's world. The approach taken here reflects a ${config.tone} perspective, offering insights that are both practical and thought-provoking. As we navigate through the complexities of this subject, we uncover valuable perspectives that can inform and inspire.`;
-};
-
+// Mock generation functions for image and code
 const generateMockImagePrompt = (config: GeneratorConfig) => {
-  return `Prompt: Create a visually stunning ${config.tone} composition featuring ${config.topic}. The scene should be set in a modern, minimalist environment with soft natural lighting streaming from the left. Use a color palette of muted earth tones with pops of vibrant accent colors. The style should be clean and contemporary, with careful attention to composition and balance. Include subtle textures and depth to create visual interest. The mood should be inspiring and aspirational, with a focus on clarity and sophistication. Shot with a 50mm lens, f/2.8, natural depth of field.`;
+  return `Create a visually stunning ${config.tone} composition featuring: ${config.prompt}. The scene should be set in a modern, minimalist environment with soft natural lighting streaming from the left. Use a color palette of muted earth tones with pops of vibrant accent colors. The style should be clean and contemporary, with careful attention to composition and balance. Include subtle textures and depth to create visual interest. The mood should be inspiring and aspirational, with a focus on clarity and sophistication. Shot with a 50mm lens, f/2.8, natural depth of field.`;
 };
 
 const generateMockCode = (config: GeneratorConfig) => {
-  return `<!-- ${config.topic} Card Component -->
+  return `<!-- ${config.prompt} Component -->
 <div class="card" style="
   max-width: 400px;
   padding: 2rem;
@@ -176,7 +186,7 @@ const generateMockCode = (config: GeneratorConfig) => {
   box-shadow: 0 10px 40px rgba(0,0,0,0.2);
 ">
   <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem;">
-    ${config.topic}
+    ${config.prompt}
   </h2>
   <p style="margin: 0; opacity: 0.9; line-height: 1.6;">
     A beautiful card component with gradient background

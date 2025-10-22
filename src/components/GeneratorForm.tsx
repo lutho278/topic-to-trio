@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles } from "lucide-react";
@@ -11,40 +11,122 @@ interface GeneratorFormProps {
 }
 
 export interface GeneratorConfig {
-  topic: string;
+  prompt: string;
   tone: string;
   length: string;
   mode: string;
+  textType?: string;
 }
 
 export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
-  const [topic, setTopic] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [tone, setTone] = useState("professional");
   const [length, setLength] = useState("medium");
   const [mode, setMode] = useState("text");
+  const [textType, setTextType] = useState("story");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (topic.trim()) {
-      onGenerate({ topic, tone, length, mode });
+    if (prompt.trim()) {
+      onGenerate({ prompt, tone, length, mode, textType });
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="topic">Topic or Idea</Label>
-        <Input
-          id="topic"
-          placeholder="e.g., Sustainable fashion capsule wardrobe"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
+        <Label htmlFor="prompt">Your Prompt</Label>
+        <Textarea
+          id="prompt"
+          placeholder="Describe what you want to generate..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
           required
-          className="text-base"
+          rows={4}
+          className="resize-none"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Mode Selection */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            type="button"
+            onClick={() => setMode("text")}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              mode === "text"
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary/50"
+            }`}
+          >
+            <div className="text-2xl mb-1">📝</div>
+            <div className="font-semibold text-sm">Text</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("image")}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              mode === "image"
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary/50"
+            }`}
+          >
+            <div className="text-2xl mb-1">🎨</div>
+            <div className="font-semibold text-sm">Image</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("code")}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              mode === "code"
+                ? "border-primary bg-primary/10"
+                : "border-border hover:border-primary/50"
+            }`}
+          >
+            <div className="text-2xl mb-1">💻</div>
+            <div className="font-semibold text-sm">Code</div>
+          </button>
+        </div>
+      </div>
+
+      {/* Text Mode Options */}
+      {mode === "text" && (
+        <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border/50">
+          <Label htmlFor="textType">Text Type</Label>
+          <Select value={textType} onValueChange={setTextType}>
+            <SelectTrigger id="textType">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="story">Story</SelectItem>
+              <SelectItem value="blog">Blog Post</SelectItem>
+              <SelectItem value="poem">Poem</SelectItem>
+              <SelectItem value="social">Social Media Post</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Image Mode Options */}
+      {mode === "image" && (
+        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+          <p className="text-sm text-muted-foreground">
+            AI will generate a detailed image prompt and create an image for you.
+          </p>
+        </div>
+      )}
+
+      {/* Code Mode Options */}
+      {mode === "code" && (
+        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+          <p className="text-sm text-muted-foreground">
+            AI will generate a functional code snippet based on your prompt.
+          </p>
+        </div>
+      )}
+
+      {/* Common Options */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="tone">Tone / Style</Label>
           <Select value={tone} onValueChange={setTone}>
@@ -73,26 +155,12 @@ export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => 
             </SelectContent>
           </Select>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="mode">Mode</Label>
-          <Select value={mode} onValueChange={setMode}>
-            <SelectTrigger id="mode">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="text">Text Only</SelectItem>
-              <SelectItem value="image">Image Prompt Only</SelectItem>
-              <SelectItem value="code">Code Only</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       <Button 
         type="submit" 
         className="w-full bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 transition-opacity text-lg h-12"
-        disabled={isLoading || !topic.trim()}
+        disabled={isLoading || !prompt.trim()}
       >
         <Sparkles className="mr-2 h-5 w-5" />
         {isLoading ? "Generating..." : "Generate"}
