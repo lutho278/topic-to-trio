@@ -10,9 +10,10 @@ interface OutputCardProps {
   content: string;
   icon: React.ReactNode;
   language?: string;
+  imageUrl?: string;
 }
 
-export const OutputCard = ({ title, description, content, icon, language }: OutputCardProps) => {
+export const OutputCard = ({ title, description, content, icon, language, imageUrl }: OutputCardProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -22,21 +23,47 @@ export const OutputCard = ({ title, description, content, icon, language }: Outp
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.${language === 'code' ? 'txt' : 'txt'}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("Downloaded successfully!");
+  const handleDownload = async () => {
+    if (imageUrl) {
+      // Download image
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success("Image downloaded successfully!");
+      } catch (error) {
+        toast.error("Failed to download image");
+      }
+    } else {
+      // Download text content
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.${language === 'code' ? 'txt' : 'txt'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Downloaded successfully!");
+    }
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
+    if (imageUrl) {
+      // Share image - Facebook share URL
+      const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(imageUrl)}`;
+      window.open(facebookShareUrl, '_blank', 'width=600,height=400');
+      toast.success("Opening Facebook share dialog!");
+    } else if (navigator.share) {
+      // Share text content using Web Share API
       try {
         await navigator.share({
           title: title,
@@ -98,7 +125,13 @@ export const OutputCard = ({ title, description, content, icon, language }: Outp
         </div>
       </CardHeader>
       <CardContent>
-        {language === "code" ? (
+        {imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt={title} 
+            className="w-full rounded-lg"
+          />
+        ) : language === "code" ? (
           <pre className="bg-white p-4 rounded-lg overflow-x-auto text-sm border border-border">
             <code className="text-black">{content}</code>
           </pre>

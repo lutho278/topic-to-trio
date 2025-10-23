@@ -133,33 +133,14 @@ const Index = () => {
                 />
               )}
 
-              {generatedContent.imagePrompt && (
-                <>
-                  <OutputCard
-                    title="Image Prompt"
-                    description="Ready for AI image generators"
-                    content={generatedContent.imagePrompt}
-                    icon={<Image className="h-5 w-5" />}
-                  />
-                  {generatedContent.imageUrl && (
-                    <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border/50">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Image className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">Generated Image</h3>
-                          <p className="text-sm text-muted-foreground">AI-generated from your prompt</p>
-                        </div>
-                      </div>
-                      <img 
-                        src={generatedContent.imageUrl} 
-                        alt="AI generated" 
-                        className="w-full rounded-lg"
-                      />
-                    </div>
-                  )}
-                </>
+              {generatedContent.imageUrl && (
+                <OutputCard
+                  title="Generated Image"
+                  description="AI-generated from your prompt"
+                  content=""
+                  imageUrl={generatedContent.imageUrl}
+                  icon={<Image className="h-5 w-5" />}
+                />
               )}
 
               {generatedContent.code && (
