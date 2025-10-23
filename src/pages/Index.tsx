@@ -42,12 +42,14 @@ const Index = () => {
           content.text = data.text;
         }
       } else if (config.mode === "image") {
-        const imagePrompt = generateMockImagePrompt(config);
-        content.imagePrompt = imagePrompt;
+        content.imagePrompt = config.prompt;
         
         // Call edge function to generate image
         const { data, error } = await supabase.functions.invoke('generate-image', {
-          body: { prompt: imagePrompt }
+          body: { 
+            prompt: config.prompt,
+            style: config.imageStyle 
+          }
         });
         
         if (error) {
@@ -58,8 +60,22 @@ const Index = () => {
           content.imageUrl = data.imageUrl;
         }
       } else if (config.mode === "code") {
-        content.code = generateMockCode(config);
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        const { data, error } = await supabase.functions.invoke('generate-text', {
+          body: { 
+            prompt: `Generate a ${config.codeLanguage || 'JavaScript'} code snippet for: ${config.prompt}. Only return the code, no explanations.`,
+            textType: 'code',
+            tone: 'professional',
+            length: 'medium'
+          }
+        });
+        
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        if (data?.text) {
+          content.code = data.text;
+        }
       }
 
       setGeneratedContent(content);
@@ -77,12 +93,12 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+        <div className="container mx-auto px-4 py-6 text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary">
             AI Multi-Modal Generator
           </h1>
-          <p className="text-muted-foreground mt-2">
-            Generate text, image prompts, and code from one idea.
+          <p className="text-foreground mt-2">
+            Generate text, images, and code from your prompts.
           </p>
         </div>
       </header>
@@ -170,41 +186,5 @@ const Index = () => {
   );
 };
 
-// Mock generation functions for image and code
-const generateMockImagePrompt = (config: GeneratorConfig) => {
-  return `Create a visually stunning ${config.tone} composition featuring: ${config.prompt}. The scene should be set in a modern, minimalist environment with soft natural lighting streaming from the left. Use a color palette of muted earth tones with pops of vibrant accent colors. The style should be clean and contemporary, with careful attention to composition and balance. Include subtle textures and depth to create visual interest. The mood should be inspiring and aspirational, with a focus on clarity and sophistication. Shot with a 50mm lens, f/2.8, natural depth of field.`;
-};
-
-const generateMockCode = (config: GeneratorConfig) => {
-  return `<!-- ${config.prompt} Component -->
-<div class="card" style="
-  max-width: 400px;
-  padding: 2rem;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-">
-  <h2 style="margin: 0 0 1rem 0; font-size: 1.5rem;">
-    ${config.prompt}
-  </h2>
-  <p style="margin: 0; opacity: 0.9; line-height: 1.6;">
-    A beautiful card component with gradient background
-    and modern styling. Perfect for showcasing content.
-  </p>
-  <button style="
-    margin-top: 1.5rem;
-    padding: 0.75rem 1.5rem;
-    background: white;
-    color: #667eea;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-  ">
-    Learn More
-  </button>
-</div>`;
-};
 
 export default Index;

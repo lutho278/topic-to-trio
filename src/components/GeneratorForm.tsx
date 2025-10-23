@@ -16,6 +16,8 @@ export interface GeneratorConfig {
   length: string;
   mode: string;
   textType?: string;
+  imageStyle?: string;
+  codeLanguage?: string;
 }
 
 export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
@@ -24,11 +26,13 @@ export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => 
   const [length, setLength] = useState("medium");
   const [mode, setMode] = useState("text");
   const [textType, setTextType] = useState("story");
+  const [imageStyle, setImageStyle] = useState("realistic");
+  const [codeLanguage, setCodeLanguage] = useState("javascript");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (prompt.trim()) {
-      onGenerate({ prompt, tone, length, mode, textType });
+      onGenerate({ prompt, tone, length, mode, textType, imageStyle, codeLanguage });
     }
   };
 
@@ -91,71 +95,102 @@ export const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => 
 
       {/* Text Mode Options */}
       {mode === "text" && (
-        <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border/50">
-          <Label htmlFor="textType">Text Type</Label>
-          <Select value={textType} onValueChange={setTextType}>
-            <SelectTrigger id="textType">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="story">Story</SelectItem>
-              <SelectItem value="blog">Blog Post</SelectItem>
-              <SelectItem value="poem">Poem</SelectItem>
-              <SelectItem value="social">Social Media Post</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+          <div className="space-y-2">
+            <Label htmlFor="textType">Text Type</Label>
+            <Select value={textType} onValueChange={setTextType}>
+              <SelectTrigger id="textType">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="story">Story</SelectItem>
+                <SelectItem value="blog">Blog Post</SelectItem>
+                <SelectItem value="poem">Poem</SelectItem>
+                <SelectItem value="social">Social Media Post</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="tone">Tone / Style</Label>
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger id="tone">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="creative">Creative</SelectItem>
+                  <SelectItem value="playful">Playful</SelectItem>
+                  <SelectItem value="minimal">Minimal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="length">Output Length</Label>
+              <Select value={length} onValueChange={setLength}>
+                <SelectTrigger id="length">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="short">Short</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="long">Long</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Image Mode Options */}
       {mode === "image" && (
-        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-          <p className="text-sm text-muted-foreground">
-            AI will generate a detailed image prompt and create an image for you.
-          </p>
+        <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border/50">
+          <Label htmlFor="imageStyle">Image Style</Label>
+          <Select value={imageStyle} onValueChange={setImageStyle}>
+            <SelectTrigger id="imageStyle">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="realistic">Realistic</SelectItem>
+              <SelectItem value="artistic">Artistic</SelectItem>
+              <SelectItem value="abstract">Abstract</SelectItem>
+              <SelectItem value="minimalist">Minimalist</SelectItem>
+              <SelectItem value="cyberpunk">Cyberpunk</SelectItem>
+              <SelectItem value="fantasy">Fantasy</SelectItem>
+              <SelectItem value="cartoon">Cartoon</SelectItem>
+              <SelectItem value="3d-render">3D Render</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
 
       {/* Code Mode Options */}
       {mode === "code" && (
-        <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-          <p className="text-sm text-muted-foreground">
-            AI will generate a functional code snippet based on your prompt.
-          </p>
+        <div className="space-y-2 p-4 bg-muted/30 rounded-lg border border-border/50">
+          <Label htmlFor="codeLanguage">Programming Language</Label>
+          <Select value={codeLanguage} onValueChange={setCodeLanguage}>
+            <SelectTrigger id="codeLanguage">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="javascript">JavaScript</SelectItem>
+              <SelectItem value="typescript">TypeScript</SelectItem>
+              <SelectItem value="python">Python</SelectItem>
+              <SelectItem value="java">Java</SelectItem>
+              <SelectItem value="csharp">C#</SelectItem>
+              <SelectItem value="cpp">C++</SelectItem>
+              <SelectItem value="go">Go</SelectItem>
+              <SelectItem value="rust">Rust</SelectItem>
+              <SelectItem value="php">PHP</SelectItem>
+              <SelectItem value="ruby">Ruby</SelectItem>
+              <SelectItem value="swift">Swift</SelectItem>
+              <SelectItem value="kotlin">Kotlin</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       )}
-
-      {/* Common Options */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="tone">Tone / Style</Label>
-          <Select value={tone} onValueChange={setTone}>
-            <SelectTrigger id="tone">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="professional">Professional</SelectItem>
-              <SelectItem value="creative">Creative</SelectItem>
-              <SelectItem value="playful">Playful</SelectItem>
-              <SelectItem value="minimal">Minimal</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="length">Output Length</Label>
-          <Select value={length} onValueChange={setLength}>
-            <SelectTrigger id="length">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="short">Short</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="long">Long</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
       <Button 
         type="submit" 

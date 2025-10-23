@@ -12,13 +12,23 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, style = "realistic" } = await req.json();
     console.log('Generating image with prompt:', prompt);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
+
+    // Style mapping for more accurate generation
+    const stylePrompt = style === "realistic" ? prompt :
+                       style === "artistic" ? `${prompt}, artistic painting style` :
+                       style === "abstract" ? `${prompt}, abstract art style` :
+                       style === "minimalist" ? `${prompt}, minimalist design` :
+                       style === "cyberpunk" ? `${prompt}, cyberpunk aesthetic` :
+                       style === "fantasy" ? `${prompt}, fantasy illustration` :
+                       style === "cartoon" ? `${prompt}, cartoon style` :
+                       style === "3d-render" ? `${prompt}, 3D rendered` : prompt;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -31,7 +41,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'user',
-            content: prompt
+            content: stylePrompt
           }
         ],
         modalities: ['image', 'text']
