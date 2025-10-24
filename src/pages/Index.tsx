@@ -38,6 +38,11 @@ const Index = () => {
           throw new Error(error.message);
         }
         
+        if (data?.error) {
+          toast.error(data.error);
+          return;
+        }
+        
         if (data?.text) {
           content.text = data.text;
         }
@@ -56,6 +61,11 @@ const Index = () => {
           throw new Error(error.message);
         }
         
+        if (data?.error) {
+          toast.error(data.error);
+          return;
+        }
+        
         if (data?.imageUrl) {
           content.imageUrl = data.imageUrl;
         }
@@ -71,6 +81,11 @@ const Index = () => {
         
         if (error) {
           throw new Error(error.message);
+        }
+        
+        if (data?.error) {
+          toast.error(data.error);
+          return;
         }
         
         if (data?.text) {
